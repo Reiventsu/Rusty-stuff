@@ -1,24 +1,32 @@
+pub mod food;
+pub mod game;
+pub mod snake;
+
 use raylib::prelude::*;
 
 // Global values
 
-// [C++]constexpr auto green = Color(173, 204, 96, 255);
-const fn green() -> Color {
-    Color {
-        r: 173,
-        g: 204,
-        b: 96,
-        a: 255,
-    }
-}
+mod const_colors {
+    use raylib::color::*;
 
-// [C++] constexpr auto darkGreen = Color(43, 51, 24, 255);
-const fn dark_green() -> Color {
-    Color {
-        r: 43,
-        g: 51,
-        b: 24,
-        a: 255,
+    // [C++]constexpr auto green = Color(173, 204, 96, 255);
+    pub const fn green() -> Color {
+        Color {
+            r: 173,
+            g: 204,
+            b: 96,
+            a: 255,
+        }
+    }
+
+    // [C++] constexpr auto darkGreen = Color(43, 51, 24, 255);
+    pub const fn dark_green() -> Color {
+        Color {
+            r: 43,
+            g: 51,
+            b: 24,
+            a: 255,
+        }
     }
 }
 
@@ -36,180 +44,7 @@ const OFFSET: i32 = 75;
 //     });
 // }
 
-pub fn element_in_deque() {
-    
-}
-
-
-// Le snek
-// class Snake {
-// public:
-//     enum class Direction {
-//         Right, // 0 + 2 % 4 == 2 (Left)
-//         Up,    // 1 + 2 % 4 == 3 (Down)
-//         Left,  // 2 + 2 % 4 == 0 (Right)
-//         Down,  // 3 + 2 % 4 == 1 (Up)
-//     };
-
-//     static constexpr Direction inverse(Direction d) noexcept {
-//         return static_cast<Direction>((static_cast<int>(d) + 2) % 4);
-//     }
-
-//     static constexpr Vector2 vector(Direction d) noexcept {
-//         constexpr Vector2 v[] {
-//             {+1,  0}, // Right
-//             { 0, -1}, // Up
-//             {-1,  0}, // Left
-//             { 0, +1} // Down
-//         };
-//         return v[static_cast<int>(d)];
-//     }
-
-//     std::deque<Vector2> body = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}};
-//     Direction direction = Direction::Right;
-//     Direction nextDirection = Direction::Right;
-//     bool shouldGrow = false;
-
-//     void ProcessInput(const Direction newDirection) {
-//         if (newDirection == inverse(direction)) return;
-//         nextDirection = newDirection;
-//     }
-
-//     void UpdateSnake() {
-//         direction = nextDirection;
-//         const Vector2 movement = vector(direction);
-//         const Vector2 newHead = Vector2Add(body.front(), movement);
-//         body.push_front(newHead);
-//         if (!shouldGrow) body.pop_back();
-//         shouldGrow = false;
-//     }
-
-//     void DrawSnake() const {
-//         for (const auto &[x, y]: body) {
-//             const auto segment = Rectangle{
-//                 static_cast<float>(offset) + x * static_cast<float>(cellSize),
-//                 static_cast<float>(offset) + y * static_cast<float>(cellSize),
-//                 static_cast<float>(cellSize),
-//                 static_cast<float>(cellSize)
-//             };
-//             DrawRectangleRounded(segment, 0.5, 6, darkGreen);
-//         }
-//     }
-
-//     void Reset() {
-//         body = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}};
-//         direction = Direction::Right;
-//         nextDirection = Direction::Right;
-//     }
-// };
-
-// Class for food for the snake to eat
-// class Food {
-// public:
-//     Vector2 position{};
-//     Texture2D texture{};
-
-//     explicit Food(const std::deque<Vector2> &snakeBody) {
-//         const Image image = LoadImage("../Graphics/FoodImage.png");
-//         texture = LoadTextureFromImage(image);
-//         UnloadImage(image);
-//         position = GenerateRandomPos(snakeBody);
-//     }
-
-//     ~Food() {
-//         UnloadTexture(texture);
-//     }
-
-//     void DrawFood() const {
-//         DrawTexture(
-//             texture,
-//             offset + static_cast<int>(position.x) * cellSize,
-//             offset + static_cast<int>(position.y) * cellSize,
-//             WHITE
-//         );
-//     }
-
-//     static Vector2 GenerateRandomCell() {
-//         const int x = GetRandomValue(0, cellCount - 1);
-//         const int y = GetRandomValue(0, cellCount - 1);
-//         return Vector2{
-//             static_cast<float>(x),
-//             static_cast<float>(y)
-//         };
-//     }
-
-//     static Vector2 GenerateRandomPos(const std::deque<Vector2> &snakeBody) {
-//         int attempts = 0;
-
-//         Vector2 position = GenerateRandomCell();
-//         while (ElementInDeque(position, snakeBody.begin(), snakeBody.end())) {
-//             if (constexpr int maxAttempts = 1000; ++attempts > maxAttempts) {
-//                 std::cerr << "Failed to generate food position! " << std::endl;
-//                 break;
-//             }
-//             position = GenerateRandomCell();
-//         }
-//         return position;
-//     }
-// };
-
-// class SnakeGame {
-// public:
-//     Snake snake;
-//     Food food;
-//     bool gameRunning = true;
-//     int gameScore = 0;
-
-//     SnakeGame() : food(snake.body) {
-//         snake.Reset();
-//     }
-
-//     void CheckCollisionWithFood() {
-//         if (Vector2Equals(snake.body.front(), food.position)) {
-//             std::cout << "Eating Food" << std::endl;
-//             food.position = Food::GenerateRandomPos(snake.body);
-//             snake.shouldGrow = true;
-//             gameScore++;
-//         }
-//     }
-
-//     void Update() {
-//         if (gameRunning) {
-//             snake.UpdateSnake();
-//             CheckCollisionWithFood();
-//             CheckCollisionWithEdges();
-//             CheckCollisionWithTail();
-//         }
-//     }
-
-//     void Draw() const {
-//         food.DrawFood();
-//         snake.DrawSnake();
-//     }
-
-//     void CheckCollisionWithEdges() {
-//         if (snake.body.front().x == static_cast<float>(cellCount) || snake.body.front().x == -1) {
-//             GameOver();
-//         }
-//         if (snake.body.front().y == static_cast<float>(cellCount) || snake.body.front().y == -1) {
-//             GameOver();
-//         }
-//     }
-
-//     void CheckCollisionWithTail() {
-//         if (ElementInDeque(snake.body.front(),
-//                            std::next(snake.body.begin()), snake.body.end())) {
-//             GameOver();
-//         }
-//     }
-
-//     void GameOver() {
-//         std::cout << "GAME OVER" << std::endl;
-//         snake.Reset();
-//         food.position = Food::GenerateRandomPos(snake.body);
-//         gameRunning = false;
-//     }
-// };
+fn element_in_deque() {}
 
 // main function of the program makes the window and handles input that interact with the other parts of the program.
 // int main() {
@@ -282,4 +117,33 @@ pub fn element_in_deque() {
 //     return 0;
 // }
 
-fn main() {}
+/*
+use raylib::prelude::*;
+
+fn main() {
+    let (mut rl, thread) = raylib::init()
+        .size(640, 480)
+        .title("Hello, World")
+        .build();
+
+    while !rl.window_should_close() {
+        let mut d = rl.begin_drawing(&thread);
+
+        d.clear_background(Color::WHITE);
+        d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
+    }
+}
+InitWindow(2 * offset + cellSize * cellCount, 2 * offset + cellSize * cellCount, "Snake Game");
+ */
+fn main() {
+    let (mut rl, thread) = raylib::init()
+        .size(2 * OFFSET + CELL_SIZE * CELL_COUNT, 2 * OFFSET + CELL_SIZE * CELL_COUNT)
+        .title("RustySnake Recreation")
+        .build();
+    
+    while !rl.window_should_close() {
+        let mut d = rl.begin_drawing(&thread);
+        
+        d.clear_background(const_colors::green());
+    }
+}
