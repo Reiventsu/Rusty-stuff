@@ -134,16 +134,38 @@ fn main() {
     }
 }
 InitWindow(2 * offset + cellSize * cellCount, 2 * offset + cellSize * cellCount, "Snake Game");
+
+ DrawRectangleLinesEx(Rectangle{
+//                                  static_cast<float>(offset) - 5,
+//                                  static_cast<float>(offset) - 5,
+//                                  static_cast<float>(cellSize * cellCount + 10),
+//                                  static_cast<float>(cellSize * cellCount + 10)
+//                              },
+//                              5, darkGreen);
  */
 fn main() {
     let (mut rl, thread) = raylib::init()
-        .size(2 * OFFSET + CELL_SIZE * CELL_COUNT, 2 * OFFSET + CELL_SIZE * CELL_COUNT)
+        .size(
+            2 * OFFSET + CELL_SIZE * CELL_COUNT,
+            2 * OFFSET + CELL_SIZE * CELL_COUNT,
+        )
         .title("RustySnake Recreation")
         .build();
-    
+
     while !rl.window_should_close() {
-        let mut d = rl.begin_drawing(&thread);
-        
-        d.clear_background(const_colors::green());
+        let mut game_window = rl.begin_drawing(&thread);
+
+        game_window.clear_background(const_colors::green());
+
+        game_window.draw_rectangle_lines_ex(
+            rrect(
+                OFFSET - 5,
+                OFFSET - 5,
+                CELL_SIZE * CELL_COUNT + 10,
+                CELL_SIZE * CELL_COUNT + 10,
+            ),
+            5.0,
+            const_colors::dark_green(),
+        )
     }
 }
