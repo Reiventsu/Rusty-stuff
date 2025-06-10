@@ -159,7 +159,7 @@ fn main() {
         )
         .title("RustySnake Recreation")
         .build();
-    
+
     rl.set_target_fps(60);
 
     while !rl.window_should_close() {

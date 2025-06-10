@@ -1,15 +1,7 @@
-// Le snek
-// class Snake {
-// public:
-//     enum class Direction {
-//         Right, // 0 + 2 % 4 == 2 (Left)
-//         Up,    // 1 + 2 % 4 == 3 (Down)
-//         Left,  // 2 + 2 % 4 == 0 (Right)
-//         Down,  // 3 + 2 % 4 == 1 (Up)
-//     };
-
+use std::collections::VecDeque;
 use raylib::prelude::*;
 
+//// Snake Direction control struct
 pub enum Direction {
     Up,
     Right,
@@ -18,6 +10,14 @@ pub enum Direction {
 }
 
 impl Direction {
+    pub fn inverse_direction(self) -> Direction {
+        match self {
+            Direction::Up => Direction::Down,
+            Direction::Right => Direction::Left,
+            Direction::Down => Direction::Up,
+            Direction::Left => Direction::Right,
+        }
+    }
     pub fn to_vector(self) -> Vector2 {
         match self {
             Direction::Up => Vector2::new(0.0, -1.0),
@@ -29,19 +29,17 @@ impl Direction {
 }
 
 
-//     static constexpr Direction inverse(Direction d) noexcept {
-//         return static_cast<Direction>((static_cast<int>(d) + 2) % 4);
-//     }
+//// Snake logic struct
+pub struct Snake {
+    body: VecDeque<Vector2>,
+    direction: Direction,
+    next_direction: Direction,
+    should_grow: bool,
+}
 
-//     static constexpr Vector2 vector(Direction d) noexcept {
-//         constexpr Vector2 v[] {
-//             {+1,  0}, // Right
-//             { 0, -1}, // Up
-//             {-1,  0}, // Left
-//             { 0, +1} // Down
-//         };
-//         return v[static_cast<int>(d)];
-//     }
+impl Snake {
+    
+}
 
 //     std::deque<Vector2> body = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}};
 //     Direction direction = Direction::Right;
