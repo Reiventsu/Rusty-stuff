@@ -63,6 +63,10 @@ pub struct Food {
 //     }
 
 impl Food {
-    pub fn 
-    let image = Image::load_image("Graphics/FoodImage.png")
+    pub fn load_image() -> food_image {
+        
+    }
+                      
+                      ("Graphics/FoodImage.png")
+    let texture = 
 }

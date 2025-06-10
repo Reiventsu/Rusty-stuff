@@ -12,7 +12,7 @@ pub mod snake;
 mod const_colors {
     use raylib::color::*;
 
-    // [C++]constexpr auto green = Color(173, 204, 96, 255);
+    // [C++] constexpr auto green = Color(173, 204, 96, 255);
     pub const fn green() -> Color {
         Color {
             r: 173,
