@@ -47,3 +47,22 @@
 //         return position;
 //     }
 // };
+
+use raylib::prelude::*;
+
+pub struct Food {
+    position: Vector2,
+    texture: Texture2D,
+}
+
+//explicit Food(const std::deque<Vector2> &snakeBody) {
+//         const Image image = LoadImage("../Graphics/FoodImage.png");
+//         texture = LoadTextureFromImage(image);
+//         UnloadImage(image);
+//         position = GenerateRandomPos(snakeBody);
+//     }
+
+impl Food {
+    pub fn 
+    let image = Image::load_image("Graphics/FoodImage.png")
+}

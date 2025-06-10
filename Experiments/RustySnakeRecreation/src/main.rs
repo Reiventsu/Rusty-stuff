@@ -1,8 +1,11 @@
+// Use
+
+use raylib::prelude::*;
+
+// Modules
 pub mod food;
 pub mod game;
 pub mod snake;
-
-use raylib::prelude::*;
 
 // Global values
 
@@ -37,14 +40,19 @@ mod const_colors {
 const CELL_SIZE: i32 = 30;
 const CELL_COUNT: i32 = 25;
 const OFFSET: i32 = 75;
+/*
+bool ElementInDeque(const Vector2 element, const auto &start, const auto &end)
 
-// bool ElementInDeque(const Vector2 element, const auto &start, const auto &end) {
-//     return std::ranges::any_of(start, end, [&element](const Vector2 &i) {
-//         return Vector2Equals(i, element);
-//     });
-// }
+{
+    return std::ranges::any_of(start, end, [&element](const Vector2 &i) {
 
-fn element_in_deque() {}
+        return Vector2Equals(i, element);
+    });
+}
+*/
+pub fn element_in_deque(element: Vector2, deque: impl IntoIterator<Item = Vector2>) -> bool {
+    deque.into_iter().any(|i| i == element)
+}
 
 // main function of the program makes the window and handles input that interact with the other parts of the program.
 // int main() {
@@ -151,6 +159,8 @@ fn main() {
         )
         .title("RustySnake Recreation")
         .build();
+    
+    rl.set_target_fps(60);
 
     while !rl.window_should_close() {
         let mut game_window = rl.begin_drawing(&thread);

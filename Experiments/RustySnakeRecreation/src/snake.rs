@@ -8,6 +8,27 @@
 //         Down,  // 3 + 2 % 4 == 1 (Up)
 //     };
 
+use raylib::prelude::*;
+
+pub enum Direction {
+    Up,
+    Right,
+    Down,
+    Left,
+}
+
+impl Direction {
+    pub fn to_vector(self) -> Vector2 {
+        match self {
+            Direction::Up => Vector2::new(0.0, -1.0),
+            Direction::Right => Vector2::new(1.0, 0.0),
+            Direction::Down => Vector2::new(0.0, 1.0),
+            Direction::Left => Vector2::new(-1.0, 0.0),
+        }
+    }
+}
+
+
 //     static constexpr Direction inverse(Direction d) noexcept {
 //         return static_cast<Direction>((static_cast<int>(d) + 2) % 4);
 //     }
