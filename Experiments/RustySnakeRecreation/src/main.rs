@@ -37,9 +37,9 @@ mod const_colors {
 // constexpr int cellCount = 25;
 // constexpr int offset = 75;
 
-const CELL_SIZE: i32 = 30;
+const CELL_SIZE: f32 = 30.0;
 const CELL_COUNT: i32 = 25;
-const OFFSET: i32 = 75;
+const OFFSET: f32 = 75.0;
 /*
 bool ElementInDeque(const Vector2 element, const auto &start, const auto &end)
 
@@ -154,8 +154,8 @@ InitWindow(2 * offset + cellSize * cellCount, 2 * offset + cellSize * cellCount,
 fn main() {
     let (mut rl, thread) = raylib::init()
         .size(
-            2 * OFFSET + CELL_SIZE * CELL_COUNT,
-            2 * OFFSET + CELL_SIZE * CELL_COUNT,
+            2 * OFFSET as i32 + CELL_SIZE as i32 * CELL_COUNT,
+            2 * OFFSET as i32 + CELL_SIZE as i32 * CELL_COUNT,
         )
         .title("RustySnake Recreation")
         .build();
@@ -169,10 +169,10 @@ fn main() {
 
         game_window.draw_rectangle_lines_ex(
             rrect(
-                OFFSET - 5,
-                OFFSET - 5,
-                CELL_SIZE * CELL_COUNT + 10,
-                CELL_SIZE * CELL_COUNT + 10,
+                OFFSET - 5.0,
+                OFFSET - 5.0,
+                CELL_SIZE as i32 * CELL_COUNT + 10,
+                CELL_SIZE as i32 * CELL_COUNT + 10,
             ),
             5.0,
             const_colors::dark_green(),

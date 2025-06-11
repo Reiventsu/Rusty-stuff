@@ -8,6 +8,7 @@
 //     SnakeGame() : food(snake.body) {
 //         snake.Reset();
 //     }
+//    
 
 //     void CheckCollisionWithFood() {
 //         if (Vector2Equals(snake.body.front(), food.position)) {

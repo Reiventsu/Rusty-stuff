@@ -32,6 +32,11 @@
 //             static_cast<float>(y)
 //         };
 //     }
+pub fn generate_random_cell(rl: &mut RaylibHandle) -> Vector2 {
+    let rand_x:i32 = rl.get_random_value(0..CELL_COUNT);
+    let rand_y:i32 = rl.get_random_value(0..CELL_COUNT);
+    Vector2::new(rand_x as f32, rand_y as f32) 
+}
 
 //     static Vector2 GenerateRandomPos(const std::deque<Vector2> &snakeBody) {
 //         int attempts = 0;
@@ -48,7 +53,9 @@
 //     }
 // };
 
+use raylib::core::texture::Image;
 use raylib::prelude::*;
+use crate::CELL_COUNT;
 
 pub struct Food {
     position: Vector2,
@@ -63,10 +70,10 @@ pub struct Food {
 //     }
 
 impl Food {
-    pub fn load_image() -> food_image {
-        
+    pub fn food_image(&mut self, d: &mut RaylibDrawHandle, thread: &RaylibThread) {
+        let food = Image::load_image("Graphics/FoodImage.png").unwrap();
+        self.texture = d.load_texture_from_image(thread, &food)
+            .expect("Buy (ANY) gpu >:(");
+        let position = 
     }
-                      
-                      ("Graphics/FoodImage.png")
-    let texture = 
 }
