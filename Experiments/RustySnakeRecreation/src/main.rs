@@ -51,7 +51,7 @@ fn main() {
 
     rl.set_target_fps(60);
 
-    let mut game = game::Game::new(&mut rl);
+    let mut game = game::Game::new(&mut rl, &thread);
     let mut accumulated_time = 0.0;
     const MOVE_INTERVAL: f32 = 0.2;
 

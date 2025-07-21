@@ -11,14 +11,15 @@ pub struct Game {
 }
 
 impl Game {
-pub fn new(rl: &mut RaylibHandle) -> Self {
+pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread) -> Self {
     let snake = Snake::new();
+    let food_texture = Food::load_texture(rl, thread);
     let food_position =
         Food::generate_random_positon(rl, &snake.body).unwrap_or(Vector2::new(12.0, 12.0));
 
     Self {
         snake,
-        food: Food::new(food_position),
+        food: Food::new(food_position, food_texture),
         game_running: true,
         game_score: 0,
     }
