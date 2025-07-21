@@ -1,4 +1,4 @@
-use crate::{CELL_SIZE, OFFSET, const_colors};
+use crate::{const_colors, CELL_SIZE, OFFSET};
 use raylib::prelude::*;
 use std::cmp::PartialEq;
 use std::collections::VecDeque;
@@ -34,10 +34,10 @@ impl Direction {
 
 //// Snake logic struct
 pub struct Snake {
-    body: VecDeque<Vector2>,
+    pub(crate) body: VecDeque<Vector2>,
     direction: Direction,
     next_direction: Direction,
-    should_grow: bool,
+    pub(crate) should_grow: bool,
 }
 
 impl Snake {
@@ -56,24 +56,12 @@ impl Snake {
         }
     }
 
-    //     void ProcessInput(const Direction newDirection) {
-    //         if (newDirection == inverse(direction)) return;
-    //         nextDirection = newDirection;
-    //     }
     pub fn process_input(&mut self, new_direction: Direction) {
         if new_direction != self.direction.inverse_direction() {
             self.next_direction = new_direction;
         }
     }
 
-    //     void UpdateSnake() {
-    //         direction = nextDirection;
-    //         const Vector2 movement = vector(direction);
-    //         const Vector2 newHead = Vector2Add(body.front(), movement);
-    //         body.push_front(newHead);
-    //         if (!shouldGrow) body.pop_back();
-    //         shouldGrow = false;
-    //     }
     pub fn update(&mut self) {
         self.direction = self.next_direction;
         let movement = self.direction.to_vector();
@@ -82,24 +70,14 @@ impl Snake {
 
         if !self.should_grow {
             self.body.pop_back();
+        } else {
+            self.should_grow = false;
         }
-        self.should_grow = true;
     }
 
-    //     void DrawSnake() const {
-    //         for (const auto &[x, y]: body) {
-    //             const auto segment = Rectangle{
-    //                 static_cast<float>(offset) + x * static_cast<float>(cellSize),
-    //                 static_cast<float>(offset) + y * static_cast<float>(cellSize),
-    //                 static_cast<float>(cellSize),
-    //                 static_cast<float>(cellSize)
-    //             };
-    //             DrawRectangleRounded(segment, 0.5, 6, darkGreen);
-    //         }
-    //     }
     pub fn draw(&self, d: &mut RaylibDrawHandle) {
         for segment in &self.body {
-            let rect = rrect(
+            let rect = Rectangle::new(
                 OFFSET + segment.x * CELL_SIZE,
                 OFFSET + segment.y * CELL_SIZE,
                 CELL_SIZE,
@@ -108,15 +86,11 @@ impl Snake {
             d.draw_rectangle_rounded(rect, 0.5, 6, const_colors::dark_green());
         }
     }
+
     pub fn reset(&mut self) {
         self.body = VecDeque::from(Self::SNAKE_BODY_START);
         self.direction = Direction::Right;
         self.next_direction = Direction::Right;
+        self.should_grow = false;
     }
 }
-//     void Reset() {
-//         body = {Vector2{6, 9}, Vector2{5, 9}, Vector2{4, 9}};
-//         direction = Direction::Right;
-//         nextDirection = Direction::Right;
-//     }
-// };

@@ -1,58 +1,83 @@
-// class SnakeGame {
-// public:
-//     Snake snake;
-//     Food food;
-//     bool gameRunning = true;
-//     int gameScore = 0;
+use super::food::Food;
+use super::snake::Snake;
+use crate::CELL_COUNT;
+use raylib::prelude::*;
 
-//     SnakeGame() : food(snake.body) {
-//         snake.Reset();
-//     }
-//    
+pub struct Game {
+    pub(crate) snake: Snake,
+    food: Food,
+    pub(crate) game_running: bool,
+    pub(crate) game_score: u32,
+}
 
-//     void CheckCollisionWithFood() {
-//         if (Vector2Equals(snake.body.front(), food.position)) {
-//             std::cout << "Eating Food" << std::endl;
-//             food.position = Food::GenerateRandomPos(snake.body);
-//             snake.shouldGrow = true;
-//             gameScore++;
-//         }
-//     }
+impl Game {
+pub fn new(rl: &mut RaylibHandle) -> Self {
+    let snake = Snake::new();
+    let food_position =
+        Food::generate_random_positon(rl, &snake.body).unwrap_or(Vector2::new(12.0, 12.0));
 
-//     void Update() {
-//         if (gameRunning) {
-//             snake.UpdateSnake();
-//             CheckCollisionWithFood();
-//             CheckCollisionWithEdges();
-//             CheckCollisionWithTail();
-//         }
-//     }
+    Self {
+        snake,
+        food: Food::new(food_position),
+        game_running: true,
+        game_score: 0,
+    }
+}
 
-//     void Draw() const {
-//         food.DrawFood();
-//         snake.DrawSnake();
-//     }
+    pub fn update(&mut self, rl: &mut RaylibHandle) {
+        if self.game_running {
+            self.snake.update();
+            self.check_collision_with_food(rl);
+            self.check_collision_with_edges();
+            self.check_collision_with_tail();
+        }
+    }
 
-//     void CheckCollisionWithEdges() {
-//         if (snake.body.front().x == static_cast<float>(cellCount) || snake.body.front().x == -1) {
-//             GameOver();
-//         }
-//         if (snake.body.front().y == static_cast<float>(cellCount) || snake.body.front().y == -1) {
-//             GameOver();
-//         }
-//     }
+    pub fn draw(&self, d: &mut RaylibDrawHandle) {
+        self.snake.draw(d);
+        self.food.draw(d);
+    }
 
-//     void CheckCollisionWithTail() {
-//         if (ElementInDeque(snake.body.front(),
-//                            std::next(snake.body.begin()), snake.body.end())) {
-//             GameOver();
-//         }
-//     }
+    fn check_collision_with_food(&mut self, rl: &mut RaylibHandle) {
+        if let Some(head) = self.snake.body.front() {
+            if *head == self.food.position {
+                self.game_score += 1;
+                self.snake.should_grow = true;
 
-//     void GameOver() {
-//         std::cout << "GAME OVER" << std::endl;
-//         snake.Reset();
-//         food.position = Food::GenerateRandomPos(snake.body);
-//         gameRunning = false;
-//     }
-// };
+                if let Ok(new_pos) = Food::generate_random_positon(rl, &self.snake.body) {
+                    self.food.position = new_pos;
+                }
+            }
+        }
+    }
+
+    fn check_collision_with_edges(&mut self) {
+        if let Some(head) = self.snake.body.front() {
+            if head.x < 0.0 || head.x >= CELL_COUNT as f32 || head.y < 0.0 || head.y >= CELL_COUNT as f32 {
+                self.game_over();
+            }
+        }
+    }
+
+    fn check_collision_with_tail(&mut self) {
+        if let Some(head) = self.snake.body.front() {
+            let mut body_iter = self.snake.body.iter().skip(1);
+            if body_iter.any(|segment| segment == head) {
+                self.game_over();
+            }
+        }
+    }
+
+    fn game_over(&mut self) {
+        self.game_running = false;
+    }
+
+    pub fn reset(&mut self, rl: &mut RaylibHandle) {
+        self.snake.reset();
+        self.game_running = true;
+        self.game_score = 0;
+        self.food.position = Food::generate_random_positon(rl, &self.snake.body)
+            .unwrap_or(Vector2::new(12.0, 12.0));
+    }
+
+}
