@@ -12,6 +12,7 @@ fn main() {
     // Update systems
     app.add_systems(Update, (
         player_look,
+        player_move.after(player_look),
         focus_events,
         toggle_grab.run_if(input_just_released(KeyCode::Escape)),
     ));
@@ -21,12 +22,21 @@ fn main() {
     app.run();
 }
 
+// Definitions / Derives
 #[derive(Event, Deref)]
 struct GrabEvent(bool);
 
 #[derive(Component)]
 struct Player;
 
+#[derive(Event)]
+struct BallSpawn {
+    position: Vec3,
+}
+
+
+
+// Code
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((Camera3d::default(), Player));
 }
@@ -102,4 +112,32 @@ fn toggle_grab(
 ) {
     window.focused = !window.focused;
     commands.trigger(GrabEvent(window.focused));
+}
+
+const MOVE_SPEED: f32 = 50.;
+fn player_move(
+    mut player: Single<&mut Transform, With<Player>>,
+    input: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+) {
+    let mut delta = Vec3::ZERO;
+    if input.pressed(KeyCode::KeyA) {
+        delta.x -= 1.;
+    }
+    if input.pressed(KeyCode::KeyD) {
+        delta.x += 1.;
+    }
+    if input.pressed(KeyCode::KeyW) {
+        delta.z += 1.;
+    }
+    if input.pressed(KeyCode::KeyS) {
+        delta.z -= 1.;
+    }
+
+    let forward = player.forward().as_vec3() * delta.z;
+    let right = player.right().as_vec3() * delta.x;
+    let mut to_move = forward + right;
+    to_move.y = 0.;
+    to_move = to_move.normalize_or_zero();
+    player.translation += to_move * time.delta_secs() * MOVE_SPEED;
 }
