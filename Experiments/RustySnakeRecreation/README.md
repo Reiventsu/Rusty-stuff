@@ -6,3 +6,5 @@
 
 This is an experimental attempt at simply rewriting code I've already made
 into Rust.
+
+I am not quite happy with how this turned out even if it is functional.
