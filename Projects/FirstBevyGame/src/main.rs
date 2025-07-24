@@ -1,3 +1,4 @@
+use crate::constants::{EMPTY_SPACE, MIN_FILL, NOT_CHARGING};
 use bevy::{
     input::{common_conditions::input_just_released, mouse::AccumulatedMouseMotion},
     prelude::*,
@@ -6,20 +7,24 @@ use bevy::{
 
 //// CONSTANTS
 mod constants {
+    use bevy::color::Color;
     use bevy::math::Vec3;
     pub const GRAVITY: Vec3 = Vec3::new(0., -9.8, 0.);
     pub const MOVE_SPEED: f32 = 50.;
+    pub const NOT_CHARGING: Color = Color::linear_rgb(0.2, 0.2, 0.2);
+    pub const MIN_FILL: f32 = 29.75 / 6.;
+    pub const EMPTY_SPACE: f32 = 29.75 - MIN_FILL;
 }
 
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins);
 
-    // Startup systems
-    app.add_systems(Startup, (spawn_camera, spawn_map));
-
     // Physics
     app.insert_resource(Time::<Fixed>::from_hz(60.));
+
+    // Startup systems
+    app.add_systems(Startup, (spawn_camera, spawn_map, inti_ui));
 
     // Update systems
     app.add_systems(
@@ -40,6 +45,7 @@ fn main() {
             toggle_grab.run_if(input_just_released(KeyCode::Escape)),
             spawn_ball,
             shoot_ball.before(spawn_ball).before(focus_events),
+            update_power_bar,
         ),
     );
 
@@ -52,6 +58,10 @@ fn main() {
     // Resources
     app.init_resource::<BallData>();
 
+    app.insert_resource(Power {
+        charging: false,
+        current: 0.,
+    });
     app.run();
 }
 
@@ -65,10 +75,23 @@ struct Player;
 #[derive(Component, Deref, DerefMut)]
 struct Velocity(Vec3);
 
+#[derive(Component)]
+struct PowerBar {
+    min: f32,
+    max: f32,
+}
+
 #[derive(Event)]
 struct BallSpawn {
     position: Vec3,
     velocity: Vec3,
+    power: f32,
+}
+
+#[derive(Resource)]
+struct Power {
+    charging: bool,
+    current: f32,
 }
 
 #[derive(Resource)]
@@ -116,6 +139,49 @@ fn spawn_camera(mut commands: Commands) {
     commands.spawn((Camera3d::default(), Player));
 }
 
+fn inti_ui(mut commands: Commands) {
+    commands
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                width: Val::VMax(30.),
+                height: Val::VMax(5.),
+                bottom: Val::Px(20.),
+                left: Val::Px(20.),
+                ..Default::default()
+            },
+            BackgroundColor(Color::linear_rgb(0.5, 0.5, 0.5)),
+            BorderRadius::all(Val::VMax(5.)),
+        ))
+        .with_child((Node {
+            position_type: PositionType::Absolute,
+            min_width: Val::VMax(MIN_FILL),
+            height: Val::Percent(95.),
+            margin: UiRect::all(Val::VMax(0.125)),
+            ..Default::default()
+        },
+        BackgroundColor(NOT_CHARGING),
+            BorderRadius::all(Val::VMax(5.)),
+            PowerBar { min: 1., max: 6. },
+        ));
+}
+
+fn update_power_bar (
+    mut bars: Query<(&mut Node, &PowerBar, &mut BackgroundColor)>,
+    power: Res<Power>,
+) {
+    for (mut bar, config, mut bg) in &mut bars {
+        if !power.charging {
+            bg.0 = NOT_CHARGING;
+            bar.width = Val::VMax(MIN_FILL);
+        } else {
+            let percent = (power.current - config.min) / (config.max - config.min);
+            bg.0 = Color::linear_rgb(1. - percent, percent, 0.);
+            bar.width = Val::VMax(MIN_FILL + percent * EMPTY_SPACE);
+        }
+    }
+}
+
 fn spawn_map(mut commands: Commands, ball_data: Res<BallData>) {
     commands.spawn(DirectionalLight::default());
     for h in 0..ball_data.materials.len() {
@@ -141,7 +207,7 @@ fn spawn_ball(
             Transform::from_translation(spawn.position),
             Mesh3d(ball_data.mesh()),
             MeshMaterial3d(ball_data.material()),
-            Velocity(spawn.velocity),
+            Velocity(spawn.velocity * spawn.power * 10.),
         ));
     }
 }
@@ -158,17 +224,32 @@ fn shoot_ball(
     player: Single<&Transform, With<Player>>,
     mut spawner: EventWriter<BallSpawn>,
     window: Single<&Window, With<Window>>,
+    mut power: ResMut<Power>,
+    time: Res<Time>,
 ) {
     if window.cursor_options.visible {
         return;
     }
-    if !input.just_pressed(MouseButton::Left) {
-        return;
+
+    if power.charging {
+        if input.just_released(MouseButton::Left) {
+            spawner.write(BallSpawn {
+                position: player.translation,
+                velocity: player.forward().as_vec3(),
+                power: power.current,
+            });
+        }
+        if input.pressed(MouseButton::Left) {
+            power.current += time.delta_secs();
+            power.current = power.current.clamp(1., 6.);
+        } else {
+            power.charging = false;
+        }
     }
-    spawner.write(BallSpawn {
-        position: player.translation,
-        velocity: player.forward().as_vec3() * 15.,
-    });
+    if input.just_pressed(MouseButton::Left) {
+        power.charging = true;
+        power.current = 1.;
+    }
 }
 
 fn apply_velocity(mut objects: Query<(&mut Transform, &Velocity)>, time: Res<Time>) {
