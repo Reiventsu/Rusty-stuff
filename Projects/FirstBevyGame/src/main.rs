@@ -67,6 +67,7 @@ impl BallData {
 
 impl FromWorld for BallData {
     fn from_world(world: &mut World) -> Self {
+        use rand::SeedableRng;
         let mesh = world.resource_mut::<Assets<Mesh>>().add(Sphere::new(1.));
         let mut materials = Vec::new();
         let mut material_assets = world.resource_mut::<Assets<StandardMaterial>>();
@@ -77,9 +78,11 @@ impl FromWorld for BallData {
                 ..Default::default()
             }));
         }
+        let seed = *b"PhaestusFoxBevyBasicsRemastered0";
         BallData {
             mesh,
             materials,
+            rng: std::sync::Mutex::new(rand::rngs::StdRng::from_seed(seed)),
         }
     }
 }
@@ -94,17 +97,15 @@ fn spawn_map(
     ball_data: Res<BallData>,
 ) {
     commands.spawn(DirectionalLight::default());
-    let ball_mesh = mesh_assets.add(Sphere::new(1.));
-    for h in 0..16 {
-        let color = Color::hsl((h as f32 / 16.) * 360., 1., 0.5);
-        let ball_material = material_assets.add(StandardMaterial {
-            base_color: color,
-            ..Default::default()
-        });
+    for h in 0..ball_data.materials.len() {
         commands.spawn((
-            Transform::from_translation(Vec3::new((-8. + h as f32) * 2., 0., -50.0)),
-            Mesh3d(ball_mesh.clone()),
-            MeshMaterial3d(ball_material),
+            Transform::from_translation(Vec3::new(
+                (-(ball_data.materials.len() as f32) * 0.5 + h as f32) * 2.,
+                0.,
+                -50.0,
+            )),
+            Mesh3d(ball_data.mesh()),
+            MeshMaterial3d(ball_data.materials[h].clone()),
         ));
     }
 }
@@ -112,14 +113,13 @@ fn spawn_map(
 fn spawn_ball(
     mut events: EventReader<BallSpawn>,
     mut commands: Commands,
-    mut mesh_assets: ResMut<Assets<Mesh>>,
-    mut mat_assets: ResMut<Assets<StandardMaterial>>,
+    ball_data: Res<BallData>,
 ) {
     for spawn in events.read() {
         commands.spawn((
             Transform::from_translation(spawn.position),
-            Mesh3d(mesh_assets.add(Sphere::new(1.))),
-            MeshMaterial3d(mat_assets.add(StandardMaterial::default())),
+            Mesh3d(ball_data.mesh()),
+            MeshMaterial3d(ball_data.material()),
         ));
     }
 }
