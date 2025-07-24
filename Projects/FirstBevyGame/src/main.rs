@@ -4,6 +4,13 @@ use bevy::{
     window::{CursorGrabMode, PrimaryWindow, WindowFocused},
 };
 
+//// CONSTANTS
+mod constants {
+    use bevy::math::Vec3;
+    pub const GRAVITY: Vec3 = Vec3::new(0., -9.8, 0.);
+    pub const MOVE_SPEED: f32 = 50.;
+}
+
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins);
@@ -11,7 +18,19 @@ fn main() {
     // Startup systems
     app.add_systems(Startup, (spawn_camera, spawn_map));
 
+    // Physics
+    app.insert_resource(Time::<Fixed>::from_hz(60.));
+
     // Update systems
+    app.add_systems(
+        FixedUpdate,
+        (
+            apply_velocity,
+            apply_gravity.before(apply_velocity),
+            bounce.after(apply_velocity),
+        ),
+    );
+
     app.add_systems(
         Update,
         (
@@ -43,9 +62,13 @@ struct GrabEvent(bool);
 #[derive(Component)]
 struct Player;
 
+#[derive(Component, Deref, DerefMut)]
+struct Velocity(Vec3);
+
 #[derive(Event)]
 struct BallSpawn {
     position: Vec3,
+    velocity: Vec3,
 }
 
 #[derive(Resource)]
@@ -88,14 +111,12 @@ impl FromWorld for BallData {
 }
 
 // Code
+
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((Camera3d::default(), Player));
 }
 
-fn spawn_map(
-    mut commands: Commands,
-    ball_data: Res<BallData>,
-) {
+fn spawn_map(mut commands: Commands, ball_data: Res<BallData>) {
     commands.spawn(DirectionalLight::default());
     for h in 0..ball_data.materials.len() {
         commands.spawn((
@@ -120,10 +141,18 @@ fn spawn_ball(
             Transform::from_translation(spawn.position),
             Mesh3d(ball_data.mesh()),
             MeshMaterial3d(ball_data.material()),
+            Velocity(spawn.velocity),
         ));
     }
 }
 
+fn bounce(mut balls: Query<(&Transform, &mut Velocity)>) {
+    for (transform, mut velocity) in &mut balls {
+        if transform.translation.y < 0. && velocity.y < 0. {
+            velocity.y *= -1.;
+        }
+    }
+}
 fn shoot_ball(
     input: Res<ButtonInput<MouseButton>>,
     player: Single<&Transform, With<Player>>,
@@ -138,7 +167,21 @@ fn shoot_ball(
     }
     spawner.write(BallSpawn {
         position: player.translation,
+        velocity: player.forward().as_vec3() * 15.,
     });
+}
+
+fn apply_velocity(mut objects: Query<(&mut Transform, &Velocity)>, time: Res<Time>) {
+    for (mut transform, velocity) in &mut objects {
+        transform.translation += velocity.0 * time.delta_secs();
+    }
+}
+
+fn apply_gravity(mut objects: Query<&mut Velocity>, time: Res<Time>) {
+    let g = constants::GRAVITY * time.delta_secs();
+    for mut velocity in &mut objects {
+        **velocity += g;
+    }
 }
 
 fn player_look(
@@ -182,7 +225,6 @@ fn toggle_grab(mut window: Single<&mut Window, With<PrimaryWindow>>, mut command
     commands.trigger(GrabEvent(window.focused));
 }
 
-const MOVE_SPEED: f32 = 50.;
 fn player_move(
     mut player: Single<&mut Transform, With<Player>>,
     input: Res<ButtonInput<KeyCode>>,
@@ -211,5 +253,5 @@ fn player_move(
     let mut to_move = forward + right;
     to_move.y = 0.;
     to_move = to_move.normalize_or_zero();
-    player.translation += to_move * time.delta_secs() * MOVE_SPEED;
+    player.translation += to_move * time.delta_secs() * constants::MOVE_SPEED;
 }
