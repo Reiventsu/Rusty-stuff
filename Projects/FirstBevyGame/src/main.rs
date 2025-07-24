@@ -1,4 +1,6 @@
-use crate::constants::{EMPTY_SPACE, MIN_FILL, NOT_CHARGING};
+pub mod definitions;
+
+use crate::definitions::*;
 use bevy::{
     input::{common_conditions::input_just_released, mouse::AccumulatedMouseMotion},
     prelude::*,
@@ -64,75 +66,6 @@ fn main() {
     });
     app.run();
 }
-
-// Definitions / Derives
-#[derive(Event, Deref)]
-struct GrabEvent(bool);
-
-#[derive(Component)]
-struct Player;
-
-#[derive(Component, Deref, DerefMut)]
-struct Velocity(Vec3);
-
-#[derive(Component)]
-struct PowerBar {
-    min: f32,
-    max: f32,
-}
-
-#[derive(Event)]
-struct BallSpawn {
-    position: Vec3,
-    velocity: Vec3,
-    power: f32,
-}
-
-#[derive(Resource)]
-struct Power {
-    charging: bool,
-    current: f32,
-}
-
-#[derive(Resource)]
-struct BallData {
-    mesh: Handle<Mesh>,
-    materials: Vec<Handle<StandardMaterial>>,
-    rng: std::sync::Mutex<rand::rngs::StdRng>,
-}
-impl BallData {
-    fn mesh(&self) -> Handle<Mesh> {
-        self.mesh.clone()
-    }
-    fn material(&self) -> Handle<StandardMaterial> {
-        use rand::seq::IndexedRandom;
-        let mut rng = self.rng.lock().unwrap();
-        self.materials.choose(&mut *rng).unwrap().clone()
-    }
-}
-
-impl FromWorld for BallData {
-    fn from_world(world: &mut World) -> Self {
-        use rand::SeedableRng;
-        let mesh = world.resource_mut::<Assets<Mesh>>().add(Sphere::new(1.));
-        let mut materials = Vec::new();
-        let mut material_assets = world.resource_mut::<Assets<StandardMaterial>>();
-        for i in 0..36 {
-            let color = Color::hsl((i * 10) as f32, 1., 0.5);
-            materials.push(material_assets.add(StandardMaterial {
-                base_color: color,
-                ..Default::default()
-            }));
-        }
-        let seed = *b"PhaestusFoxBevyBasicsRemastered0";
-        BallData {
-            mesh,
-            materials,
-            rng: std::sync::Mutex::new(rand::rngs::StdRng::from_seed(seed)),
-        }
-    }
-}
-
 // Code
 
 fn spawn_camera(mut commands: Commands) {
@@ -155,12 +88,12 @@ fn inti_ui(mut commands: Commands) {
         ))
         .with_child((Node {
             position_type: PositionType::Absolute,
-            min_width: Val::VMax(MIN_FILL),
+            min_width: Val::VMax(constants::MIN_FILL),
             height: Val::Percent(95.),
             margin: UiRect::all(Val::VMax(0.125)),
             ..Default::default()
         },
-        BackgroundColor(NOT_CHARGING),
+        BackgroundColor(constants::NOT_CHARGING),
             BorderRadius::all(Val::VMax(5.)),
             PowerBar { min: 1., max: 6. },
         ));
@@ -172,12 +105,12 @@ fn update_power_bar (
 ) {
     for (mut bar, config, mut bg) in &mut bars {
         if !power.charging {
-            bg.0 = NOT_CHARGING;
-            bar.width = Val::VMax(MIN_FILL);
+            bg.0 = constants::NOT_CHARGING;
+            bar.width = Val::VMax(constants::MIN_FILL);
         } else {
             let percent = (power.current - config.min) / (config.max - config.min);
             bg.0 = Color::linear_rgb(1. - percent, percent, 0.);
-            bar.width = Val::VMax(MIN_FILL + percent * EMPTY_SPACE);
+            bar.width = Val::VMax(constants::MIN_FILL + percent * constants::EMPTY_SPACE);
         }
     }
 }
