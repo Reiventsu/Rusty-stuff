@@ -1,32 +1,10 @@
-use::bevy::prelude::*;
+use bevy::asset::{Assets, Handle};
+use bevy::color::Color;
+use bevy::pbr::StandardMaterial;
+use bevy::prelude::{FromWorld, Mesh, Resource, Sphere, World};
 use rand::seq::IndexedRandom;
 use rand::SeedableRng;
 
-// Public components
-#[derive(Component)]
-pub struct Player;
-
-#[derive(Component, Deref, DerefMut)]
-pub struct Velocity(pub Vec3);
-
-#[derive(Component)]
-pub struct PowerBar {
-    pub min: f32,
-    pub max: f32,
-}
-
-// Public events
-#[derive(Event)]
-pub struct BallSpawn {
-    pub position: Vec3,
-    pub velocity: Vec3,
-    pub power: f32,
-}
-
-#[derive(Event, Deref)]
-pub struct GrabEvent(pub bool);
-
-// Public resources
 #[derive(Resource)]
 pub struct Power {
     pub charging: bool,
@@ -49,7 +27,7 @@ impl BallData {
     }
 }
 
-impl FromWorld for crate::BallData {
+impl FromWorld for BallData {
     fn from_world(world: &mut World) -> Self {
         let mesh = world.resource_mut::<Assets<Mesh>>().add(Sphere::new(1.));
         let mut materials = Vec::new();
@@ -62,7 +40,7 @@ impl FromWorld for crate::BallData {
             }));
         }
         let seed = *b"PhaestusFoxBevyBasicsRemastered0";
-        crate::BallData {
+        BallData {
             mesh,
             materials,
             rng: std::sync::Mutex::new(rand::rngs::StdRng::from_seed(seed)),
