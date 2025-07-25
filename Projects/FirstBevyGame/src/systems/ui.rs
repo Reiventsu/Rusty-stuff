@@ -1,8 +1,11 @@
-use bevy::color::Color;
-use bevy::prelude::{BackgroundColor, BorderRadius, Commands, EventReader, Node, PositionType, Query, Res, Single, Trigger, UiRect, Val, Window, With};
-use bevy::window::{CursorGrabMode, PrimaryWindow, WindowFocused};
 use crate::constants::{EMPTY_SPACE, MIN_FILL, NOT_CHARGING};
 use crate::core::{GrabEvent, Power, PowerBar};
+use bevy::color::Color;
+use bevy::prelude::{
+    BackgroundColor, BorderRadius, Commands, EventReader, Node, PositionType, Query, Res, Single,
+    Trigger, UiRect, Val, Window, With,
+};
+use bevy::window::{CursorGrabMode, PrimaryWindow, WindowFocused};
 
 pub fn inti_ui(mut commands: Commands) {
     commands
@@ -18,20 +21,21 @@ pub fn inti_ui(mut commands: Commands) {
             BackgroundColor(Color::linear_rgb(0.5, 0.5, 0.5)),
             BorderRadius::all(Val::VMax(5.)),
         ))
-        .with_child((Node {
-            position_type: PositionType::Absolute,
-            min_width: Val::VMax(MIN_FILL),
-            height: Val::Percent(95.),
-            margin: UiRect::all(Val::VMax(0.125)),
-            ..Default::default()
-        },
-                     BackgroundColor(NOT_CHARGING),
-                     BorderRadius::all(Val::VMax(5.)),
-                     PowerBar { min: 1., max: 6. },
+        .with_child((
+            Node {
+                position_type: PositionType::Absolute,
+                min_width: Val::VMax(MIN_FILL),
+                height: Val::Percent(95.),
+                margin: UiRect::all(Val::VMax(0.125)),
+                ..Default::default()
+            },
+            BackgroundColor(NOT_CHARGING),
+            BorderRadius::all(Val::VMax(5.)),
+            PowerBar { min: 1., max: 6. },
         ));
 }
 
-pub fn update_power_bar (
+pub fn update_power_bar(
     mut bars: Query<(&mut Node, &PowerBar, &mut BackgroundColor)>,
     power: Res<Power>,
 ) {

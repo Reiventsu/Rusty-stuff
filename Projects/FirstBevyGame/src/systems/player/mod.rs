@@ -1,5 +1,5 @@
-pub mod movement;
 pub mod camera;
+pub mod movement;
 
-pub use movement::*;
 pub use camera::*;
+pub use movement::*;

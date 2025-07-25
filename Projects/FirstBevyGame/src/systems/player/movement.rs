@@ -1,9 +1,9 @@
+use crate::constants::MOVE_SPEED;
+use crate::core::Player;
 use bevy::input::ButtonInput;
 use bevy::math::Vec3;
 use bevy::prelude::{KeyCode, Res, Single, Time, Transform, Window, With};
 use bevy::window::PrimaryWindow;
-use crate::constants::MOVE_SPEED;
-use crate::core::Player;
 
 pub fn player_move(
     mut player: Single<&mut Transform, With<Player>>,

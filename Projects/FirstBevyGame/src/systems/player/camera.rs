@@ -1,7 +1,7 @@
+use crate::core::Player;
 use bevy::input::mouse::AccumulatedMouseMotion;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use crate::core::Player;
 
 pub fn spawn_camera(mut commands: Commands) {
     commands.spawn((Camera3d::default(), Player));

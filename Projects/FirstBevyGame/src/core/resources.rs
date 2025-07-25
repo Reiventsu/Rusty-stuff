@@ -2,8 +2,8 @@ use bevy::asset::{Assets, Handle};
 use bevy::color::Color;
 use bevy::pbr::StandardMaterial;
 use bevy::prelude::{FromWorld, Mesh, Resource, Sphere, World};
-use rand::seq::IndexedRandom;
 use rand::SeedableRng;
+use rand::seq::IndexedRandom;
 
 #[derive(Resource)]
 pub struct Power {

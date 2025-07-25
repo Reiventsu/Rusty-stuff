@@ -1,6 +1,6 @@
-use bevy::prelude::{Query, Res, Time, Transform};
 use crate::constants::GRAVITY;
 use crate::core::Velocity;
+use bevy::prelude::{Query, Res, Time, Transform};
 
 pub fn apply_velocity(mut objects: Query<(&mut Transform, &Velocity)>, time: Res<Time>) {
     for (mut transform, velocity) in &mut objects {

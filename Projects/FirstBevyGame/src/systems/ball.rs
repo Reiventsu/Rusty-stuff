@@ -1,7 +1,10 @@
+use crate::core::{BallData, BallSpawn, Player, Power, Velocity};
 use bevy::input::ButtonInput;
 use bevy::pbr::MeshMaterial3d;
-use bevy::prelude::{Commands, EventReader, EventWriter, Mesh3d, MouseButton, Query, Res, ResMut, Single, Time, Transform, Window, With};
-use crate::core::{BallData, BallSpawn, Player, Power, Velocity};
+use bevy::prelude::{
+    Commands, EventReader, EventWriter, Mesh3d, MouseButton, Query, Res, ResMut, Single, Time,
+    Transform, Window, With,
+};
 
 pub fn spawn_ball(
     mut events: EventReader<BallSpawn>,
